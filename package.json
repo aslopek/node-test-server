@@ -1,0 +1,55 @@
+{
+  "name": "@aslope/node-test-server",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Server for mocking/simulating HTTP APIs to ease development and testing of client-side code",
+  "author": "Armin Slopek",
+  "license": "MIT",
+  "main": "dist/main/index.js",
+  "types": "dist/main/index.d.ts",
+  "bin": "dist/main/bin.js",
+  "exports": {
+    ".": {
+      "types": "./dist/main/index.d.ts",
+      "default": "./dist/main/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=19.8.1"
+  },
+  "scripts": {
+    "build": "npm run clean && npx tsc",
+    "clean": "npx rimraf dist",
+    "init:tls": "npx rimraf tls && npx mkdirp tls && openssl req -newkey rsa:4096 -new -nodes -x509 -days 3650 -keyout tls/key.pem -out tls/cert.pem",
+    "test": "npx jest",
+    "test:api": "npx @openapitools/openapi-generator-cli validate -i node-test-server-api.yaml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aslopek/node-test-server"
+  },
+  "homepage": "https://github.com/aslopek/node-test-server",
+  "files": [
+    "dist",
+    "node-test-server-api.yaml"
+  ],
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.7.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.0.1",
+    "jest": "^30.4.2",
+    "mkdirp": "^3.0.1",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^6.0.2"
+  },
+  "keywords": [
+    "api",
+    "integration test",
+    "mock",
+    "simulate",
+    "simulation",
+    "test"
+  ]
+}

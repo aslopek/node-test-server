@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "strict": true,
+    "target": "es2015",
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "src/main/**/*.ts"
+  ],
+  "exclude": [
+    "jest.config.ts",
+    "*.test.ts",
+    "*.unit-test.ts",
+    "*.integration-test.ts"
+  ]
+}

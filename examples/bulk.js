@@ -1,0 +1,22 @@
+/** @type BulkRequest[] }*/
+const bulk = [
+    [{
+        path: '/hello',
+        method: 'GET'
+    }, [{
+        status: 200,
+        headers: {'Content-Type': 'text/plain'},
+        body: 'Hello, there!'
+    }], 'REPEAT'],
+    [{
+        path: '/other/endpoint',
+        method: 'GET'
+    }, [{
+        status: 200,
+        headers: {'Content-Type': 'text/plain'},
+        body: 'You\'ve reached the /other/endpoint!'
+    }], 'REPEAT']
+];
+
+module.exports = bulk;
+exports.default = bulk;

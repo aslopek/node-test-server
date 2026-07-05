@@ -1,0 +1,238 @@
+openapi: 3.0.3
+
+info:
+  title: Node Test Server
+  description: API for accessing and managing the Node Test Server
+  version: 1.0.0
+  license:
+    name: 'MIT'
+    url: 'https://opensource.org/license/mit/'
+
+servers:
+  - url: 'http://localhost:8080'
+    description: 'Some example host - the actual host and port depend on the configuration'
+  - url: 'https://localhost:8080'
+    description: 'Some example host - the actual host and port depend on the configuration'
+
+paths:
+  /_/stop:
+    post:
+      parameters:
+        - in: query
+          name: force
+          required: false
+          description: 'When true, forcefully stop the server. When false or absent, gracefully stop the server.'
+          schema:
+            type: boolean
+      tags:
+        - NodeTestServer
+      operationId: stopServer
+      description: 'Stops the server. When running via the CLI (npx), the process exits afterwards. When
+        NodeTestServer is embedded as a library, only the HTTP(S) server is stopped - the host process keeps running.'
+      responses:
+        '202':
+          description: 'Received the request to stop the server. Answer contains the server process PID'
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+                nullable: false
+                minimum: 0
+                example: 5
+
+  /_/heartbeat:
+    get:
+      tags:
+        - NodeTestServer
+      operationId: heartbeat
+      description: 'For verifying if the server accepts requests'
+      responses:
+        '200':
+          description: 'Contains the server process PID'
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+                nullable: false
+                minimum: 0
+                example: 5
+
+  /_/mock-responses:
+    post:
+      tags:
+        - MockResponse
+      operationId: createMockResponses
+      description: 'Configure the mock server to return the given responses, when receiving the given request'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMockResponsesRequest'
+      responses:
+        '204':
+          description: 'Successfully created the mock responses (removed previously existing responses if applicable)'
+        '400':
+          description: 'Request body did not match API contract'
+    delete:
+      tags:
+        - MockResponse
+      operationId: deleteMockResponses
+      description: 'Delete all mock responses'
+      responses:
+        '204':
+          description: 'Successfully deleted all mock responses'
+
+  /_/received-requests:
+    get:
+      parameters:
+        - in: query
+          name: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Path'
+        - in: query
+          name: method
+          required: true
+          schema:
+            $ref: '#/components/schemas/Method'
+      tags:
+        - ReceivedRequest
+      operationId: getReceivedRequests
+      description: 'Query the received requests for a given path/method combination'
+      responses:
+        '200':
+          description: 'The received requests for the given path/method combination'
+          content:
+            application/json:
+              schema:
+                type: array
+                nullable: false
+                minItems: 0
+                items:
+                  $ref: '#/components/schemas/ReceivedRequest'
+    delete:
+      tags:
+        - ReceivedRequest
+      operationId: deleteReceivedRequests
+      description: 'Delete all received requests'
+      responses:
+        '204':
+          description: 'Successfully deleted all received requests'
+
+  /_/received-requests/count:
+    get:
+      tags:
+        - ReceivedRequest
+      operationId: getNumberOfReceivedRequests
+      description: 'Get the number of all received requests (excluding deleted requests and management requests)'
+      responses:
+        '200':
+          description: 'The number of received requests (excluding deleted requests and management requests)'
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int32
+                nullable: false
+                minimum: 0
+                example: 5
+
+components:
+  schemas:
+    CreateMockResponsesRequest:
+      type: object
+      required:
+        - mockRequest
+        - mockResponses
+        - mode
+      properties:
+        mockRequest:
+          $ref: '#/components/schemas/MockRequest'
+        mockResponses:
+          type: array
+          minItems: 1
+          nullable: false
+          items:
+            $ref: '#/components/schemas/MockResponse'
+        mode:
+          description: 'Determines if each response should be sent once, or if the first response should be sent again
+          after the last response'
+          type: string
+          nullable: false
+          enum:
+            - 'ONCE'
+            - 'REPEAT'
+          example: 'ONCE'
+
+    Method:
+      type: string
+      nullable: false
+      enum:
+        - 'GET'
+        - 'HEAD'
+        - 'POST'
+        - 'PUT'
+        - 'DELETE'
+        - 'CONNECT'
+        - 'OPTIONS'
+        - 'TRACE'
+        - 'PATCH'
+      example: 'POST'
+
+    Path:
+      type: string
+      minLength: 1
+      nullable: false
+      example: '/resources/1'
+
+    MockRequest:
+      type: object
+      required:
+        - method
+        - path
+      properties:
+        method:
+          $ref: '#/components/schemas/Method'
+        path:
+          $ref: '#/components/schemas/Path'
+
+    MockResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: integer
+          format: int32
+          nullable: false
+          example: 200
+        body: { }
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+
+    ReceivedRequest:
+      type: object
+      required:
+        - method
+        - path
+        - headers
+        - queryParameters
+      properties:
+        method:
+          $ref: '#/components/schemas/Method'
+        path:
+          $ref: '#/components/schemas/Path'
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+        queryParameters:
+          type: object
+          additionalProperties:
+            type: string
+        body: { }
